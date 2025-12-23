@@ -6,12 +6,14 @@ interface CluesTableProps {
   acrossWords: PlacedWord[];
   downWords: PlacedWord[];
   onClueUpdate: (wordNumber: number, newClue: string) => void;
+  previewMode?: boolean;
 }
 
 export const CluesTable: React.FC<CluesTableProps> = ({
   acrossWords,
   downWords,
-  onClueUpdate
+  onClueUpdate,
+  previewMode = false
 }) => {
   const [editingClue, setEditingClue] = useState<{ 
     number: number; 
@@ -19,7 +21,9 @@ export const CluesTable: React.FC<CluesTableProps> = ({
   } | null>(null);
 
   const handleClueClick = (wordNumber: number, type: 'across' | 'down') => {
-    setEditingClue({ number: wordNumber, type });
+    if (!previewMode) {
+      setEditingClue({ number: wordNumber, type });
+    }
   };
 
   const handleClueUpdate = (wordNumber: number, newClue: string) => {
@@ -38,6 +42,62 @@ export const CluesTable: React.FC<CluesTableProps> = ({
       setEditingClue(null);
     }
   };
+
+  if (previewMode) {
+    return (
+      <div className="clues-section preview-mode">
+        <div className="clues-column">
+          <div className="clues-header">
+            <h3>Across</h3>
+            <span className="clues-count">({acrossWords.length})</span>
+          </div>
+          <div className="clues-table">
+            {acrossWords.length === 0 ? (
+              <div className="no-clues">
+                No across words
+              </div>
+            ) : (
+              acrossWords.map(word => (
+                <div key={word.number} className="clue-row">
+                  <span className="clue-number">{word.number}.</span>
+                  <div className="clue-content">
+                    <div className="clue-text preview-clue">
+                      {word.clue}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        
+        <div className="clues-column">
+          <div className="clues-header">
+            <h3>Down</h3>
+            <span className="clues-count">({downWords.length})</span>
+          </div>
+          <div className="clues-table">
+            {downWords.length === 0 ? (
+              <div className="no-clues">
+                No down words
+              </div>
+            ) : (
+              downWords.map(word => (
+                <div key={word.number} className="clue-row">
+                  <span className="clue-number">{word.number}.</span>
+                  <div className="clue-content">
+                    <div className="clue-text preview-clue">
+                      {word.clue}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="clues-section">
@@ -69,7 +129,6 @@ export const CluesTable: React.FC<CluesTableProps> = ({
                         type="text"
                         value={word.clue}
                         onChange={(e) => {
-                          // Update immediately as user types
                           const updatedClue = e.target.value;
                           const wordToUpdate = acrossWords.find(w => w.number === word.number);
                           if (wordToUpdate) {

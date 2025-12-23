@@ -1,0 +1,20 @@
+/* Traditional crossword style */
+.traditional-crossword .crossword-preview-grid {
+  background: #000;
+  gap: 0;
+}
+
+.traditional-crossword .preview-grid-cell.has-word {
+  background: white;
+  border: 1px solid #000;
+}
+
+.traditional-crossword .preview-grid-cell.no-word {
+  background: #000;
+  border: none;
+}
+
+.traditional-crossword .preview-cell-number {
+  background: white;
+  box-shadow: none;
+}

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useCrossword } from './hooks/useCrossword';
 import { useCSVParser } from './hooks/useCSVParser';
 import { CrosswordGrid } from './components/CrosswordGrid/CrosswordGrid';
+import { CrosswordPreview } from './components/CrosswordPreview/CrosswordPreview';
 import { WordList } from './components/WordList/WordList';
 import { Controls } from './components/Controls/Controls';
 import { CluesTable } from './components/CluesTable/CluesTable';
@@ -10,6 +11,7 @@ import './App.css';
 function App() {
   const [inputValue, setInputValue] = useState('');
   const [clueValue, setClueValue] = useState('');
+  const [viewMode, setViewMode] = useState<'editor' | 'preview'>('editor');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -71,7 +73,6 @@ function App() {
 
     clearMessages();
     handleCsvUpload(file, words, (newWords) => {
-      // Add new words to the list
       newWords.forEach(wordClue => {
         addWord(wordClue.word, wordClue.clue);
       });
@@ -197,7 +198,22 @@ function App() {
 
           <div className="crossword-container">
             <div className="crossword-header">
-              <h2>Crossword Grid</h2>
+              <h2>Crossword {viewMode === 'editor' ? 'Editor' : 'Preview'}</h2>
+              <div className="view-mode-toggle">
+                <button
+                  onClick={() => setViewMode('editor')}
+                  className={`view-mode-btn ${viewMode === 'editor' ? 'active' : ''}`}
+                >
+                  ✏️ Editor
+                </button>
+                <button
+                  onClick={() => setViewMode('preview')}
+                  className={`view-mode-btn ${viewMode === 'preview' ? 'active' : ''}`}
+                  disabled={!crosswordGrid}
+                >
+                  👁️ Preview
+                </button>
+              </div>
               {generationStats && (
                 <div className="generation-stats">
                   <span className="stat-badge">Placed: {generationStats.placed}/{generationStats.total}</span>
@@ -209,29 +225,48 @@ function App() {
             
             {crosswordGrid ? (
               <>
-                <CrosswordGrid
-                  grid={crosswordGrid}
-                  placedWords={placedWords}
-                  gridRows={gridRows}
-                  gridCols={gridCols}
-                />
-                
-                <CluesTable
-                  acrossWords={acrossWords}
-                  downWords={downWords}
-                  onClueUpdate={(wordNumber, newClue) => {
-                    const wordIndex = placedWords.findIndex(w => w.number === wordNumber);
-                    if (wordIndex !== -1) {
-                      const updatedWords = [...placedWords];
-                      updatedWords[wordIndex].clue = newClue;
-                      // Update the original words list as well
-                      const originalWordIndex = words.findIndex(w => w.word === updatedWords[wordIndex].word);
-                      if (originalWordIndex !== -1) {
-                        updateWordClue(originalWordIndex, newClue);
-                      }
-                    }
-                  }}
-                />
+                {viewMode === 'editor' ? (
+                  <>
+                    <CrosswordGrid
+                      grid={crosswordGrid}
+                      placedWords={placedWords}
+                      gridRows={gridRows}
+                      gridCols={gridCols}
+                    />
+                    
+                    <CluesTable
+                      acrossWords={acrossWords}
+                      downWords={downWords}
+                      onClueUpdate={(wordNumber, newClue) => {
+                        const wordIndex = placedWords.findIndex(w => w.number === wordNumber);
+                        if (wordIndex !== -1) {
+                          const updatedWords = [...placedWords];
+                          updatedWords[wordIndex].clue = newClue;
+                          const originalWordIndex = words.findIndex(w => w.word === updatedWords[wordIndex].word);
+                          if (originalWordIndex !== -1) {
+                            updateWordClue(originalWordIndex, newClue);
+                          }
+                        }
+                      }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <CrosswordPreview
+                      grid={crosswordGrid}
+                      placedWords={placedWords}
+                      gridRows={gridRows}
+                      gridCols={gridCols}
+                    />
+                    
+                    <CluesTable
+                      acrossWords={acrossWords}
+                      downWords={downWords}
+                      onClueUpdate={() => {}}
+                      previewMode={true}
+                    />
+                  </>
+                )}
               </>
             ) : (
               <div className="empty-crossword">
@@ -251,7 +286,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>Crossword Generator • Modular Architecture • Editable clues • CSV import/export</p>
+        <p>Crossword Generator • Editor & Preview Modes • CSV import/export</p>
       </footer>
     </div>
   );

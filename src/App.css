@@ -1061,3 +1061,228 @@ h2 {
 .clues-table::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+.crossword-preview-wrapper {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.crossword-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), 1fr);
+  grid-template-rows: repeat(var(--grid-rows), 1fr);
+  gap: 2px;
+  background: #333;
+  padding: 2px;
+  border-radius: 4px;
+  min-width: min(100%, 600px);
+  margin: 0 auto;
+  position: relative;
+}
+
+.preview-grid-row {
+  display: contents;
+}
+
+.preview-grid-cell {
+  aspect-ratio: 1;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border: 1px solid #ddd;
+}
+
+.preview-cell-number {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #000;
+  background: rgba(255, 255, 255, 0.9);
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  z-index: 2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.preview-cell-empty {
+  width: 100%;
+  height: 100%;
+  background: white;
+  border: none;
+}
+
+.crossword-grid-wrapper {
+  overflow-x: auto;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: white;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.crossword-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols), 1fr);
+  grid-template-rows: repeat(var(--grid-rows), 1fr);
+  gap: 2px;
+  background: var(--dark-color);
+  padding: 2px;
+  border-radius: 4px;
+  min-width: min(100%, 600px);
+  margin: 0 auto;
+}
+
+.grid-row {
+  display: contents;
+}
+
+.grid-cell {
+  aspect-ratio: 1;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.grid-cell.filled {
+  background: linear-gradient(135deg, #3a86ff, #8338ec);
+  color: white;
+  animation: popIn 0.3s ease;
+}
+
+.grid-cell.empty {
+  background: white;
+}
+
+/* Preview mode styles */
+.grid-cell.preview-mode.filled {
+  background: white;
+  color: transparent;
+  border: 1px solid #ddd;
+}
+
+.grid-cell.preview-mode .cell-letter {
+  display: none;
+}
+
+.cell-letter {
+  animation: fadeIn 0.5s ease;
+  z-index: 1;
+}
+
+/* Cell Number Styling */
+.cell-number {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: #000;
+  background: rgba(255, 255, 255, 0.9);
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  z-index: 2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .crossword-grid,
+  .crossword-preview-grid {
+    min-width: 100%;
+  }
+  
+  .grid-cell {
+    font-size: 1rem;
+  }
+  
+  .cell-number {
+    font-size: 0.5rem;
+    width: 14px;
+    height: 14px;
+  }
+}
+/* View Mode Toggle */
+.view-mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.view-mode-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  background: white;
+  color: var(--dark-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.view-mode-btn:hover:not(:disabled) {
+  background: var(--light-color);
+  transform: translateY(-1px);
+}
+
+.view-mode-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.view-mode-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Preview mode specific styles */
+.clues-section.preview-mode .clue-word-info {
+  display: none;
+}
+
+.clues-section.preview-mode .clue-intersections {
+  display: none;
+}
+
+.clues-section.preview-mode .clue-text.preview-clue {
+  cursor: default;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+}
+
+.clues-section.preview-mode .clue-text.preview-clue:hover {
+  background: transparent;
+  border-color: transparent;
+}
