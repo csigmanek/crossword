@@ -1,5 +1,5 @@
 import React from 'react';
-import { type PlacedWord } from '../../types';
+import { type PlacedWord, type SolutionWordConfig } from '../../types';
 import './CrosswordPreview.css';
 
 interface CrosswordPreviewProps {
@@ -7,13 +7,15 @@ interface CrosswordPreviewProps {
   placedWords: PlacedWord[];
   gridRows: number;
   gridCols: number;
+  solutionWord?: SolutionWordConfig | null;
 }
 
 export const CrosswordPreview: React.FC<CrosswordPreviewProps> = ({
   grid,
   placedWords,
   gridRows,
-  gridCols
+  gridCols,
+  solutionWord
 }) => {
   const getCellNumber = (row: number, col: number): number | null => {
     if (!grid[row] || !grid[row][col]) return null;
@@ -24,6 +26,26 @@ export const CrosswordPreview: React.FC<CrosswordPreviewProps> = ({
       }
     }
     return null;
+  };
+
+  const getSolutionLetterInfo = (row: number, col: number): { 
+    isSolution: boolean; 
+    position: number | null;
+  } => {
+    if (!solutionWord?.letters) return { isSolution: false, position: null };
+    
+    const letterInfo = solutionWord.letters.find(letter => 
+      letter.row === row && letter.col === col
+    );
+    
+    if (letterInfo) {
+      return {
+        isSolution: true,
+        position: letterInfo.solutionLetterPosition
+      };
+    }
+    
+    return { isSolution: false, position: null };
   };
 
   const hasContent = grid.some(row => row.some(cell => cell !== ''));
@@ -49,14 +71,20 @@ export const CrosswordPreview: React.FC<CrosswordPreviewProps> = ({
             {Array.from({ length: gridCols }).map((_, colIndex) => {
               const cellNumber = getCellNumber(rowIndex, colIndex);
               const hasWord = grid[rowIndex] && grid[rowIndex][colIndex] !== '';
+              const { isSolution, position } = getSolutionLetterInfo(rowIndex, colIndex);
               
               return (
                 <div
                   key={`${rowIndex}-${colIndex}`}
-                  className={`preview-grid-cell ${hasWord ? 'has-word' : 'no-word'}`}
+                  className={`preview-grid-cell ${hasWord ? 'has-word' : 'no-word'} ${isSolution ? 'solution-letter' : ''}`}
                 >
                   {cellNumber && (
                     <div className="preview-cell-number">{cellNumber}</div>
+                  )}
+                  {isSolution && position && (
+                    <div className="solution-circle">
+                      <span className="solution-number">{position}</span>
+                    </div>
                   )}
                 </div>
               );
@@ -64,6 +92,12 @@ export const CrosswordPreview: React.FC<CrosswordPreviewProps> = ({
           </div>
         ))}
       </div>
+      
+      {solutionWord && (
+        <div className="solution-word-display">
+          <h4>Solution Word: {solutionWord.word.split('').map(() => '_').join(' ')}</h4>
+        </div>
+      )}
     </div>
   );
 };

@@ -32,3 +32,15 @@ export interface CrosswordState {
   placedWords: PlacedWord[];
   generationStats: GenerationStats | null;
 }
+
+export interface SolutionWordConfig {
+  word: string;
+  description?: string;
+  letters: Array<{
+    wordIndex: number;
+    letterIndex: number;
+    row?: number;
+    col?: number;
+    solutionLetterPosition: number; // Position in the solution word (1-based)
+  }>;
+}

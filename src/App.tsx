@@ -11,6 +11,8 @@ import './App.css';
 function App() {
   const [inputValue, setInputValue] = useState('');
   const [clueValue, setClueValue] = useState('');
+  const [solutionWordInput, setSolutionWordInput] = useState('');
+  const [solutionDescription, setSolutionDescription] = useState('');
   const [viewMode, setViewMode] = useState<'editor' | 'preview'>('editor');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -22,6 +24,7 @@ function App() {
     placedWords,
     generationStats,
     isGenerating,
+    solutionWord,
     setGridRows,
     setGridCols,
     addWord,
@@ -29,6 +32,7 @@ function App() {
     updateWordClue,
     generateCrosswordPuzzle,
     clearAll,
+    setSolutionWordConfig,
   } = useCrossword();
 
   const {
@@ -50,6 +54,22 @@ function App() {
         clearMessages();
       }
     }
+  };
+
+  const handleAddSolutionWord = () => {
+    if (solutionWordInput.trim()) {
+      setSolutionWordConfig({
+        word: solutionWordInput.toUpperCase(),
+        description: solutionDescription.trim() || undefined,
+        letters: []
+      });
+      setSolutionWordInput('');
+      setSolutionDescription('');
+    }
+  };
+
+  const handleRemoveSolutionWord = () => {
+    setSolutionWordConfig(null);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -177,6 +197,48 @@ function App() {
             </p>
           </div>
 
+          <div className="solution-section">
+            <h3>Solution Word (Optional)</h3>
+            <div className="solution-input-group">
+              <input
+                type="text"
+                value={solutionWordInput}
+                onChange={(e) => setSolutionWordInput(e.target.value.toUpperCase())}
+                placeholder="Solution word"
+                className="solution-word-input"
+                maxLength={20}
+              />
+              <input
+                type="text"
+                value={solutionDescription}
+                onChange={(e) => setSolutionDescription(e.target.value)}
+                placeholder="Theme/description (optional)"
+                className="solution-description-input"
+              />
+              <button
+                onClick={handleAddSolutionWord}
+                className="btn btn-primary"
+                disabled={!solutionWordInput.trim()}
+              >
+                {solutionWord ? 'Update' : 'Add'} Solution
+              </button>
+              {solutionWord && (
+                <button
+                  onClick={handleRemoveSolutionWord}
+                  className="btn btn-clear"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            <div className="solution-info">
+              <p className="solution-hint">
+                The letters of the solution word will be marked with circles in the crossword.
+                Letters will be automatically assigned to matching letters in the words.
+              </p>
+            </div>
+          </div>
+
           <Controls
             gridRows={gridRows}
             gridCols={gridCols}
@@ -232,6 +294,7 @@ function App() {
                       placedWords={placedWords}
                       gridRows={gridRows}
                       gridCols={gridCols}
+                      solutionWord={solutionWord}
                     />
                     
                     <CluesTable
@@ -257,6 +320,7 @@ function App() {
                       placedWords={placedWords}
                       gridRows={gridRows}
                       gridCols={gridCols}
+                      solutionWord={solutionWord}
                     />
                     
                     <CluesTable
@@ -286,7 +350,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>Crossword Generator • Editor & Preview Modes • CSV import/export</p>
+        <p>Crossword Generator • Editor & Preview Modes • CSV import/export • Solution Word Feature</p>
       </footer>
     </div>
   );

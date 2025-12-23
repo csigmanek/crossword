@@ -1204,34 +1204,6 @@ h2 {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Animations */
-@keyframes popIn {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .crossword-grid,
-  .crossword-preview-grid {
-    min-width: 100%;
-  }
-  
-  .grid-cell {
-    font-size: 1rem;
-  }
-  
-  .cell-number {
-    font-size: 0.5rem;
-    width: 14px;
-    height: 14px;
-  }
-}
 /* View Mode Toggle */
 .view-mode-toggle {
   display: flex;
@@ -1285,4 +1257,218 @@ h2 {
 .clues-section.preview-mode .clue-text.preview-clue:hover {
   background: transparent;
   border-color: transparent;
+}
+
+/* Solution Word Section */
+.solution-section {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: white;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.solution-section h3 {
+  margin-bottom: 1rem;
+  color: var(--dark-color);
+  font-size: 1.2rem;
+}
+
+.solution-input-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.solution-word-input,
+.solution-description-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  outline: none;
+}
+
+.solution-word-input:focus,
+.solution-description-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
+}
+
+.solution-info {
+  padding: 1rem;
+  background: linear-gradient(135deg, #3a86ff15 0%, #8338ec15 100%);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.solution-hint {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--gray-color);
+  font-style: italic;
+}
+
+/* Solution circles in grid */
+.grid-cell.solution-letter {
+  position: relative;
+}
+
+.solution-circle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 2px solid var(--warning-color);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.grid-cell.solution-letter .cell-letter {
+  position: relative;
+  z-index: 2;
+}
+
+/* Solution word display */
+.solution-word-display {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: white;
+  border-radius: var(--border-radius);
+  border: 2px dashed var(--warning-color);
+}
+
+.solution-word-display h4 {
+  color: var(--dark-color);
+  margin-bottom: 0.5rem;
+}
+
+.solution-theme {
+  color: var(--gray-color);
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.solution-instruction {
+  font-size: 0.9rem;
+  color: var(--warning-color);
+  font-weight: 500;
+}
+
+/* In preview mode, show solution letters differently */
+.preview-mode .solution-circle {
+  border-color: #ff9e00aa;
+  background: #ff9e0022;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .solution-input-group {
+    flex-direction: column;
+  }
+  
+  .solution-word-input,
+  .solution-description-input {
+    width: 100%;
+  }
+  
+  .crossword-grid,
+  .crossword-preview-grid {
+    min-width: 100%;
+  }
+  
+  .grid-cell {
+    font-size: 1rem;
+  }
+  
+  .cell-number {
+    font-size: 0.5rem;
+    width: 14px;
+    height: 14px;
+  }
+}
+/* Solution circles in grid - UPDATED */
+.grid-cell.solution-letter {
+  position: relative;
+}
+
+.grid-cell.solution-letter .cell-letter {
+  position: relative;
+  z-index: 2;
+}
+
+/* Solution circle and number */
+.solution-circle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 2px solid var(--warning-color);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.solution-number {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--warning-color);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Preview mode styles - FIXED */
+.grid-cell.preview-mode.solution-letter {
+  /* In preview mode, we need to ensure the circle is visible */
+  background: white !important;
+}
+
+.grid-cell.preview-mode.filled.solution-letter {
+  /* In preview mode filled cells should still show the circle */
+  background: white !important;
+}
+
+/* In preview mode, ensure solution circles are visible */
+.preview-mode .solution-circle {
+  border-color: #ff9e00aa;
+  background: #ff9e0022;
+}
+
+.preview-mode .solution-number {
+  background: #ff9e00aa;
+  color: white;
+}
+
+/* Traditional crossword solution circles */
+.traditional-crossword .preview-grid-cell.solution-letter {
+  position: relative;
+}
+
+.traditional-crossword .solution-circle {
+  border-color: #ff9e00;
+  background: #ff9e0011;
+}
+
+.traditional-crossword .solution-number {
+  background: #ff9e00;
+  color: white;
+  top: -4px;
+  right: -4px;
+  font-size: 0.5rem;
+  width: 12px;
+  height: 12px;
 }

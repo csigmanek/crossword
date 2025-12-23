@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { WordClue, PlacedWord, GenerationStats } from '../types';
+import type { WordClue, PlacedWord, GenerationStats, SolutionWordConfig } from '../types';
 import { generateCrossword } from '../utils/crosswordGenerator';
 
 export const useCrossword = () => {
@@ -10,6 +10,7 @@ export const useCrossword = () => {
   const [placedWords, setPlacedWords] = useState<PlacedWord[]>([]);
   const [generationStats, setGenerationStats] = useState<GenerationStats | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [solutionWord, setSolutionWord] = useState<SolutionWordConfig | null>(null);
 
   const addWord = useCallback((word: string, clue: string) => {
     const trimmedWord = word.trim().toUpperCase();
@@ -42,9 +43,13 @@ export const useCrossword = () => {
     setIsGenerating(true);
     
     try {
-      const result = generateCrossword(words, gridRows, gridCols);
+      const result = generateCrossword(words, gridRows, gridCols, solutionWord);
       setCrosswordGrid(result.grid);
       setPlacedWords(result.placedWords);
+      
+      if (result.solutionWord) {
+        setSolutionWord(result.solutionWord);
+      }
       
       // Calculate statistics
       const totalIntersections = result.placedWords.reduce(
@@ -65,13 +70,18 @@ export const useCrossword = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [words, gridRows, gridCols]);
+  }, [words, gridRows, gridCols, solutionWord]);
 
   const clearAll = useCallback(() => {
     setWords([]);
     setCrosswordGrid(null);
     setPlacedWords([]);
     setGenerationStats(null);
+    setSolutionWord(null);
+  }, []);
+
+  const setSolutionWordConfig = useCallback((config: SolutionWordConfig | null) => {
+    setSolutionWord(config);
   }, []);
 
   return {
@@ -83,6 +93,7 @@ export const useCrossword = () => {
     placedWords,
     generationStats,
     isGenerating,
+    solutionWord,
     
     // Setters
     setGridRows,
@@ -96,5 +107,6 @@ export const useCrossword = () => {
     updateWordClue,
     generateCrosswordPuzzle,
     clearAll,
+    setSolutionWordConfig,
   };
 };

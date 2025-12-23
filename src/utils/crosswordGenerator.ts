@@ -1,11 +1,16 @@
-import type { WordClue, PlacedWord } from '../types';
+import type { WordClue, PlacedWord, SolutionWordConfig } from '../types';
 
 // Enhanced word placement algorithm with better intersection logic
 export const generateCrossword = (
   wordList: WordClue[],
   rows: number,
-  cols: number
-): { grid: string[][]; placedWords: PlacedWord[] } => {
+  cols: number,
+  solutionWord?: SolutionWordConfig
+): { 
+  grid: string[][]; 
+  placedWords: PlacedWord[];
+  solutionWord?: SolutionWordConfig;
+} => {
   // Sort words by intersection potential first, then length
   const sortedWords = sortWordsByIntersectionPotential(wordList);
   
@@ -106,6 +111,20 @@ export const generateCrossword = (
 
   // Try to optimize the grid by repositioning words to create more intersections
   const optimized = optimizeCrossword(grid, placedWords, rows, cols);
+  
+  // If solution word exists, try to assign its letters to placed words
+  if (solutionWord && solutionWord.word.length > 0) {
+    const updatedSolutionWord = assignSolutionLetters(
+      solutionWord,
+      optimized.placedWords,
+      optimized.grid
+    );
+    return { 
+      grid: optimized.grid, 
+      placedWords: optimized.placedWords, 
+      solutionWord: updatedSolutionWord 
+    };
+  }
   
   return { grid: optimized.grid, placedWords: optimized.placedWords };
 };
@@ -726,6 +745,183 @@ const findBetterPlacement = (
   }
   
   return bestPlacement;
+};
+
+// New function to assign solution letters to placed words with better distribution
+const assignSolutionLetters = (
+  solutionWord: SolutionWordConfig,
+  placedWords: PlacedWord[],
+  grid: string[][]
+): SolutionWordConfig => {
+  const solutionLetters = solutionWord.word.split('');
+  const updatedLetters: SolutionWordConfig['letters'] = [];
+  const usedPositions = new Set<string>();
+  const wordUsageCount = new Map<number, number>();
+  const maxLettersPerWord = Math.ceil(solutionLetters.length / Math.max(1, placedWords.length / 2));
+  
+  // Initialize usage count for each word
+  placedWords.forEach((_, index) => {
+    wordUsageCount.set(index, 0);
+  });
+
+  // Try to assign each solution letter to a word
+  for (let solutionLetterIndex = 0; solutionLetterIndex < solutionLetters.length; solutionLetterIndex++) {
+    const targetLetter = solutionLetters[solutionLetterIndex];
+    let assigned = false;
+    
+    // First, try to find words that haven't been used yet or have minimal usage
+    const candidates: Array<{
+      wordIndex: number;
+      letterIndex: number;
+      row: number;
+      col: number;
+      currentUsage: number;
+    }> = [];
+    
+    // Collect all possible candidates
+    for (let wordIndex = 0; wordIndex < placedWords.length; wordIndex++) {
+      const placedWord = placedWords[wordIndex];
+      const currentUsage = wordUsageCount.get(wordIndex) || 0;
+      
+      // Skip if this word already has too many solution letters
+      if (currentUsage >= maxLettersPerWord) {
+        continue;
+      }
+      
+      // Check each letter in the word
+      for (let letterIndex = 0; letterIndex < placedWord.word.length; letterIndex++) {
+        if (placedWord.word[letterIndex] === targetLetter) {
+          // Calculate grid position
+          let row: number, col: number;
+          if (placedWord.direction === 'horizontal') {
+            row = placedWord.start.row;
+            col = placedWord.start.col + letterIndex;
+          } else {
+            row = placedWord.start.row + letterIndex;
+            col = placedWord.start.col;
+          }
+          
+          const positionKey = `${row},${col}`;
+          
+          // Ensure we don't reuse the same position
+          if (!usedPositions.has(positionKey)) {
+            candidates.push({
+              wordIndex,
+              letterIndex,
+              row,
+              col,
+              currentUsage
+            });
+          }
+        }
+      }
+    }
+    
+    // Sort candidates by:
+    // 1. Words with fewer solution letters used (spread them out)
+    // 2. Words that are longer (more opportunities for other letters)
+    // 3. Random tie-breaker
+    candidates.sort((a, b) => {
+      if (a.currentUsage !== b.currentUsage) {
+        return a.currentUsage - b.currentUsage;
+      }
+      
+      // Prefer longer words
+      const aWordLength = placedWords[a.wordIndex].word.length;
+      const bWordLength = placedWords[b.wordIndex].word.length;
+      if (aWordLength !== bWordLength) {
+        return bWordLength - aWordLength;
+      }
+      
+      // Random tie-breaker
+      return Math.random() - 0.5;
+    });
+    
+    // Try to assign to the best candidate
+    for (const candidate of candidates) {
+      const positionKey = `${candidate.row},${candidate.col}`;
+      
+      if (!usedPositions.has(positionKey)) {
+        updatedLetters.push({
+          wordIndex: candidate.wordIndex,
+          letterIndex: candidate.letterIndex,
+          row: candidate.row,
+          col: candidate.col,
+          solutionLetterPosition: solutionLetterIndex + 1 // 1-based position
+        });
+        
+        usedPositions.add(positionKey);
+        wordUsageCount.set(candidate.wordIndex, (wordUsageCount.get(candidate.wordIndex) || 0) + 1);
+        assigned = true;
+        break;
+      }
+    }
+    
+    // If no match found, try again with relaxed constraints
+    if (!assigned) {
+      // Second pass: allow words that already have max letters
+      for (let wordIndex = 0; wordIndex < placedWords.length; wordIndex++) {
+        const placedWord = placedWords[wordIndex];
+        
+        for (let letterIndex = 0; letterIndex < placedWord.word.length; letterIndex++) {
+          if (placedWord.word[letterIndex] === targetLetter) {
+            // Calculate grid position
+            let row: number, col: number;
+            if (placedWord.direction === 'horizontal') {
+              row = placedWord.start.row;
+              col = placedWord.start.col + letterIndex;
+            } else {
+              row = placedWord.start.row + letterIndex;
+              col = placedWord.start.col;
+            }
+            
+            const positionKey = `${row},${col}`;
+            
+            if (!usedPositions.has(positionKey)) {
+              updatedLetters.push({
+                wordIndex,
+                letterIndex,
+                row,
+                col,
+                solutionLetterPosition: solutionLetterIndex + 1
+              });
+              
+              usedPositions.add(positionKey);
+              wordUsageCount.set(wordIndex, (wordUsageCount.get(wordIndex) || 0) + 1);
+              assigned = true;
+              break;
+            }
+          }
+        }
+        if (assigned) break;
+      }
+    }
+    
+    // If still no match found, keep the letter without position
+    if (!assigned) {
+      console.warn(`Could not assign solution letter "${targetLetter}" (position ${solutionLetterIndex + 1}) to any word`);
+      updatedLetters.push({
+        wordIndex: -1,
+        letterIndex: -1,
+        solutionLetterPosition: solutionLetterIndex + 1
+      });
+    }
+  }
+  
+  // Verify distribution
+  const usageStats = Array.from(wordUsageCount.entries())
+    .filter(([_, count]) => count > 0)
+    .map(([wordIndex, count]) => ({
+      word: placedWords[wordIndex].word,
+      count
+    }));
+  
+  console.log('Solution letter distribution:', usageStats);
+  
+  return {
+    ...solutionWord,
+    letters: updatedLetters
+  };
 };
 
 // Utility function to calculate crossword quality score

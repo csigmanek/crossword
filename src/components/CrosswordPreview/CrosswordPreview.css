@@ -18,3 +18,56 @@
   background: white;
   box-shadow: none;
 }
+
+/* Solution circles in preview - FIXED */
+.traditional-crossword .preview-grid-cell.solution-letter {
+  position: relative;
+}
+
+.traditional-crossword .solution-circle {
+  border: 2px solid #ff9e00;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.traditional-crossword .solution-number {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff9e00;
+  color: white;
+  font-size: 0.5rem;
+  font-weight: bold;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Make sure solution letters are visible on black cells */
+.traditional-crossword .preview-grid-cell.no-word.solution-letter {
+  background: #333 !important;
+}
+
+.traditional-crossword .preview-grid-cell.no-word.solution-letter .solution-circle {
+  border-color: #ff9e00;
+  background: #ff9e0022;
+}
+
+.traditional-crossword .preview-grid-cell.no-word.solution-letter .solution-number {
+  background: #ff9e00;
+  color: white;
+}
